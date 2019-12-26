@@ -325,7 +325,7 @@ function CreateExtendedPlayer(player, accounts, inventory, job, loadout, name, l
 		item.count     = newCount
 
 		TriggerEvent('esx:onAddInventoryItem', self.source, item, count)
-		TriggerClientEvent('esx:addInventoryItem', self.source, item, count)
+		TriggerEvent('disc-inventoryhud:addItem', self.source, item, count)
 	end
 
 	self.removeInventoryItem = function(name, count)
