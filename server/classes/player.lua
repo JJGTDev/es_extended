@@ -13,6 +13,10 @@ function CreateExtendedPlayer(player, accounts, inventory, job, loadout, name, l
 	self.source     = self.player.get('source')
 	self.identifier = self.player.get('identifier')
 
+	self.triggerEvent = function(eventName, ...)
+		TriggerClientEvent(eventName, self.source, ...)
+	end
+
 	self.setMoney = function(money)
 		money = ESX.Math.Round(money)
 
@@ -263,16 +267,19 @@ function CreateExtendedPlayer(player, accounts, inventory, job, loadout, name, l
 		end
 
 		local account   = self.getAccount(acc)
-		local prevMoney = account.money
-		local newMoney  = ESX.Math.Round(money)
 
-		account.money = newMoney
+		if account then
+			local prevMoney = account.money
+			local newMoney  = ESX.Math.Round(money)
 
-		if acc == 'bank' then
-			self.set('bank', newMoney)
+			account.money = newMoney
+
+			if acc == 'bank' then
+				self.set('bank', newMoney)
+			end
+
+			TriggerClientEvent('esx:setAccountMoney', self.source, account)
 		end
-
-		TriggerClientEvent('esx:setAccountMoney', self.source, account)
 	end
 
 	self.addAccountMoney = function(acc, money)
@@ -282,15 +289,17 @@ function CreateExtendedPlayer(player, accounts, inventory, job, loadout, name, l
 		end
 
 		local account  = self.getAccount(acc)
-		local newMoney = account.money + ESX.Math.Round(money)
 
-		account.money = newMoney
+		if account then
+			local newMoney = account.money + ESX.Math.Round(money)
+			account.money = newMoney
 
-		if acc == 'bank' then
-			self.set('bank', newMoney)
+			if acc == 'bank' then
+				self.set('bank', newMoney)
+			end
+
+			TriggerClientEvent('esx:setAccountMoney', self.source, account)
 		end
-
-		TriggerClientEvent('esx:setAccountMoney', self.source, account)
 	end
 
 	self.removeAccountMoney = function(acc, money)
@@ -300,15 +309,17 @@ function CreateExtendedPlayer(player, accounts, inventory, job, loadout, name, l
 		end
 
 		local account  = self.getAccount(acc)
-		local newMoney = account.money - ESX.Math.Round(money)
 
-		account.money = newMoney
+		if account then
+			local newMoney = account.money - ESX.Math.Round(money)
+			account.money = newMoney
 
-		if acc == 'bank' then
-			self.set('bank', newMoney)
+			if acc == 'bank' then
+				self.set('bank', newMoney)
+			end
+
+			TriggerClientEvent('esx:setAccountMoney', self.source, account)
 		end
-
-		TriggerClientEvent('esx:setAccountMoney', self.source, account)
 	end
 
 	self.getInventoryItem = function(name)
@@ -317,37 +328,51 @@ function CreateExtendedPlayer(player, accounts, inventory, job, loadout, name, l
 				return v
 			end
 		end
+
+		return
 	end
 
 	self.addInventoryItem = function(name, count)
-		local item     = self.getInventoryItem(name)
-		local newCount = item.count + count
-		item.count     = newCount
+		local item = self.getInventoryItem(name)
 
-		TriggerEvent('esx:onAddInventoryItem', self.source, item, count)
-		TriggerEvent('disc-inventoryhud:addItem', self.source, name, count)
+		if item then
+			local newCount = item.count + count
+			item.count     = newCount
+
+			TriggerEvent('esx:onAddInventoryItem', self.source, item, count)
+			TriggerEvent('disc-inventoryhud:addItem', self.source, name, count)
+		end
 	end
 
 	self.removeInventoryItem = function(name, count)
-		local item     = self.getInventoryItem(name)
-		local newCount = item.count - count
-		item.count     = newCount
+		local item = self.getInventoryItem(name)
 
-		TriggerEvent('esx:onRemoveInventoryItem', self.source, item, count)
-		TriggerEvent('disc-inventoryhud:removeItem', self.source, name, count)
+		if item then
+			local newCount = item.count - count
+
+			if newCount >= 0 then
+				item.count = newCount
+
+				TriggerEvent('esx:onRemoveInventoryItem', self.source, item, count)
+				TriggerEvent('disc-inventoryhud:removeItem', self.source, name, count)
+			end
+		end
 	end
 
 	self.setInventoryItem = function(name, count)
-		local item     = self.getInventoryItem(name)
-		local oldCount = item.count
-		item.count     = count
+		local item = self.getInventoryItem(name)
 
-		if oldCount > item.count  then
-			TriggerEvent('esx:onRemoveInventoryItem', self.source, item, oldCount - item.count)
-			TriggerEvent('disc-inventoryhud:removeItem', self.source, name, oldCount - item.count)
-		else
-			TriggerEvent('esx:onAddInventoryItem', self.source, item, item.count - oldCount)
-			TriggerEvent('disc-inventoryhud:addItem', self.source, name, item.count - oldCount)
+		if item and count >= 0 then
+			local oldCount = item.count
+			item.count = count
+
+			if oldCount > item.count  then
+				TriggerEvent('esx:onRemoveInventoryItem', self.source, item, oldCount - item.count)
+				TriggerEvent('disc-inventoryhud:removeItem', self.source, name, oldCount - item.count)
+			else
+				TriggerEvent('esx:onAddInventoryItem', self.source, item, item.count - oldCount)
+				TriggerEvent('disc-inventoryhud:addItem', self.source, name, item.count - oldCount)
+			end
 		end
 	end
 
@@ -366,6 +391,20 @@ function CreateExtendedPlayer(player, accounts, inventory, job, loadout, name, l
 		local newWeight = currentWeight + (itemWeight * count)
 
 		return newWeight <= self.maxWeight
+	end
+
+	self.canSwapItem = function(firstItem, firstItemCount, testItem, testItemCount)
+		local firstItemObject = self.getInventoryItem(firstItem)
+		local testItemObject = self.getInventoryItem(testItem)
+
+		if firstItemObject.count >= firstItemCount then
+			local weightWithoutFirstItem = ESX.Math.Round(self.getWeight() - (firstItemObject.weight * firstItemCount))
+			local weightWithTestItem = ESX.Math.Round(weightWithoutFirstItem + (testItemObject.weight * testItemCount))
+
+			return weightWithTestItem <= self.maxWeight
+		end
+
+		return false
 	end
 
 	self.setMaxWeight = function(newWeight)
@@ -417,10 +456,10 @@ function CreateExtendedPlayer(player, accounts, inventory, job, loadout, name, l
 				label = weaponLabel,
 				components = {}
 			})
-		end
 
-		TriggerClientEvent('esx:addWeapon', self.source, weaponName, ammo)
-		TriggerClientEvent('esx:addInventoryItem', self.source, {label = weaponLabel}, 1)
+			TriggerClientEvent('esx:addWeapon', self.source, weaponName, ammo)
+			TriggerClientEvent('esx:addInventoryItem', self.source, {label = weaponLabel}, 1)
+		end
 	end
 
 	self.addWeaponComponent = function(weaponName, weaponComponent)
@@ -475,7 +514,7 @@ function CreateExtendedPlayer(player, accounts, inventory, job, loadout, name, l
 					break
 				end
 			end
-	
+
 			TriggerClientEvent('esx:removeWeaponComponent', self.source, weaponName, weaponComponent)
 		end
 	end
@@ -498,7 +537,7 @@ function CreateExtendedPlayer(player, accounts, inventory, job, loadout, name, l
 					return true
 				end
 			end
-	
+
 			return false
 		else
 			return false
@@ -522,7 +561,7 @@ function CreateExtendedPlayer(player, accounts, inventory, job, loadout, name, l
 			end
 		end
 
-		return nil
+		return
 	end
 
 	self.showNotification = function(msg)
