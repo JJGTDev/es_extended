@@ -405,6 +405,13 @@ AddEventHandler('esx:removeInventoryItem', function(type, itemName, itemCount)
 	end
 end)
 
+RegisterServerEvent('disc-inventoryhud:RegisterItemUse')
+AddEventHandler('disc-inventoryhud:RegisterItemUse', function(itemName)
+	local xPlayer = ESX.GetPlayerFromId(source)
+
+	ESX.UseItem(source, itemName)
+end)
+
 RegisterServerEvent('esx:useItem')
 AddEventHandler('esx:useItem', function(itemName)
 	local xPlayer = ESX.GetPlayerFromId(source)
