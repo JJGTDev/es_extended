@@ -148,7 +148,7 @@ ESX.GetPlayerFromIdentifier = function(identifier)
 end
 
 ESX.RegisterUsableItem = function(item, cb)
-	ESX.UsableItemsCallbacks[item] = cb
+	TriggerEvent('disc-inventoryhud:registerItemUse', item, cb)
 end
 
 ESX.UseItem = function(source, item)
