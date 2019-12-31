@@ -335,36 +335,19 @@ function CreateExtendedPlayer(player, accounts, inventory, job, loadout, name, l
 	self.addInventoryItem = function(name, count)
 		local item = self.getInventoryItem(name)
 
-		if item then
-			local newCount = item.count + count
-			item.count     = newCount
-
 			TriggerEvent('esx:onAddInventoryItem', self.source, item, count)
 			TriggerEvent('disc-inventoryhud:addItem', self.source, name, count)
-		end
 	end
 
 	self.removeInventoryItem = function(name, count)
 		local item = self.getInventoryItem(name)
 
-		if item then
-			local newCount = item.count - count
-
-			if newCount >= 0 then
-				item.count = newCount
-
 				TriggerEvent('esx:onRemoveInventoryItem', self.source, item, count)
 				TriggerEvent('disc-inventoryhud:removeItem', self.source, name, count)
-			end
-		end
 	end
 
 	self.setInventoryItem = function(name, count)
 		local item = self.getInventoryItem(name)
-
-		if item and count >= 0 then
-			local oldCount = item.count
-			item.count = count
 
 			if oldCount > item.count  then
 				TriggerEvent('esx:onRemoveInventoryItem', self.source, item, oldCount - item.count)
@@ -372,7 +355,6 @@ function CreateExtendedPlayer(player, accounts, inventory, job, loadout, name, l
 			else
 				TriggerEvent('esx:onAddInventoryItem', self.source, item, item.count - oldCount)
 				TriggerEvent('disc-inventoryhud:addItem', self.source, name, item.count - oldCount)
-			end
 		end
 	end
 
