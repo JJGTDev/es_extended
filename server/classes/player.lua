@@ -346,18 +346,6 @@ function CreateExtendedPlayer(player, accounts, inventory, job, loadout, name, l
 				TriggerEvent('disc-inventoryhud:removeItem', self.source, name, count)
 	end
 
-	self.setInventoryItem = function(name, count)
-		local item = self.getInventoryItem(name)
-
-			if oldCount > item.count  then
-				TriggerEvent('esx:onRemoveInventoryItem', self.source, item, oldCount - item.count)
-				TriggerEvent('disc-inventoryhud:removeItem', self.source, name, oldCount - item.count)
-			else
-				TriggerEvent('esx:onAddInventoryItem', self.source, item, item.count - oldCount)
-				TriggerEvent('disc-inventoryhud:addItem', self.source, name, item.count - oldCount)
-		end
-	end
-
 	self.getWeight = function()
 		local inventoryWeight = 0
 
