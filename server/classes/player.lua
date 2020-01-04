@@ -389,19 +389,7 @@ function CreateExtendedPlayer(player, accounts, inventory, job, loadout, name, l
 	end
 
 	self.addWeapon = function(weaponName, ammo)
-		local weaponLabel = ESX.GetWeaponLabel(weaponName)
-
-		if not self.hasWeapon(weaponName) then
-			table.insert(self.loadout, {
-				name = weaponName,
-				ammo = ammo,
-				label = weaponLabel,
-				components = {}
-			})
-
-			TriggerClientEvent('esx:addWeapon', self.source, weaponName, ammo)
-			TriggerClientEvent('esx:addInventoryItem', self.source, {label = weaponLabel}, 1)
-		end
+		TriggerEvent('disc-inventoryhud:addItem', self.source, weaponName, ammo)
 	end
 
 	self.addWeaponComponent = function(weaponName, weaponComponent)
