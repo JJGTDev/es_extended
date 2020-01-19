@@ -1,4 +1,4 @@
-function CreateExtendedPlayer(player, accounts, inventory, job, loadout, name, lastPosition)
+function CreateExtendedPlayer(player, accounts, inventory, job, loadout, name, coords)
 	local self = {}
 
 	self.player       = player
@@ -7,8 +7,8 @@ function CreateExtendedPlayer(player, accounts, inventory, job, loadout, name, l
 	self.job          = job
 	self.loadout      = loadout
 	self.name         = name
-	self.lastPosition = lastPosition
 	self.maxWeight    = Config.MaxWeight
+	self.coords       = coords
 
 	self.source     = self.player.get('source')
 	self.identifier = self.player.get('identifier')
@@ -41,23 +41,25 @@ function CreateExtendedPlayer(player, accounts, inventory, job, loadout, name, l
 		return self.player.get('bank')
 	end
 
-	self.getCoords = function(vectorType)
-		local coords = self.player.get('coords')
-		coords = {x = ESX.Math.Round(coords.x, 1), y = ESX.Math.Round(coords.y, 1), z = ESX.Math.Round(coords.z, 1)}
+	self.setCoords = function(coords)
+		self.updateCoords(coords)
+		self.triggerEvent('esx:teleport', coords)
+	end
 
-		if vectorType then
-			return vector3(coords.x, coords.y, coords.z)
+	self.updateCoords = function(coords)
+		self.coords = {x = ESX.Math.Round(coords.x, 1), y = ESX.Math.Round(coords.y, 1), z = ESX.Math.Round(coords.z, 1), heading = ESX.Math.Round(coords.heading, 1)}
+	end
+
+	self.getCoords = function(vector)
+		if vector then
+			return vector3(self.coords.x, self.coords.y, self.coords.z)
 		else
-			return coords
+			return self.coords
 		end
 	end
 
-	self.setCoords = function(x, y, z)
-		self.player.coords = {x = x, y = y, z = z}
-	end
-
 	self.kick = function(reason)
-		self.player.kick(reason)
+		DropPlayer(self.source, reason)
 	end
 
 	self.addMoney = function(money)
@@ -194,16 +196,6 @@ function CreateExtendedPlayer(player, accounts, inventory, job, loadout, name, l
 		self.name = newName
 	end
 
-	self.getLastPosition = function()
-		if self.lastPosition and self.lastPosition.x and self.lastPosition.y and self.lastPosition.z then
-			self.lastPosition.x = ESX.Math.Round(self.lastPosition.x, 1)
-			self.lastPosition.y = ESX.Math.Round(self.lastPosition.y, 1)
-			self.lastPosition.z = ESX.Math.Round(self.lastPosition.z, 1)
-		end
-
-		return self.lastPosition
-	end
-
 	self.setLastPosition = function(position)
 		self.lastPosition = position
 	end
@@ -262,7 +254,7 @@ function CreateExtendedPlayer(player, accounts, inventory, job, loadout, name, l
 					self.set('bank', newMoney)
 				end
 
-				TriggerClientEvent('esx:setAccountMoney', self.source, account)
+				self.triggerEvent('esx:setAccountMoney', account)
 			end
 		end
 	end
@@ -279,7 +271,7 @@ function CreateExtendedPlayer(player, accounts, inventory, job, loadout, name, l
 					self.set('bank', newMoney)
 				end
 	
-				TriggerClientEvent('esx:setAccountMoney', self.source, account)
+				self.triggerEvent('esx:setAccountMoney', account)
 			end
 		end
 	end
@@ -296,7 +288,7 @@ function CreateExtendedPlayer(player, accounts, inventory, job, loadout, name, l
 					self.set('bank', newMoney)
 				end
 	
-				TriggerClientEvent('esx:setAccountMoney', self.source, account)
+				self.triggerEvent('esx:setAccountMoney', account)
 			end
 		end
 	end
