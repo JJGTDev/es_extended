@@ -196,10 +196,6 @@ function CreateExtendedPlayer(player, accounts, inventory, job, loadout, name, c
 		self.name = newName
 	end
 
-	self.setLastPosition = function(position)
-		self.lastPosition = position
-	end
-
 	self.getMissingAccounts = function(cb)
 		MySQL.Async.fetchAll('SELECT name FROM user_accounts WHERE identifier = @identifier', {
 			['@identifier'] = self.getIdentifier()
@@ -306,8 +302,45 @@ function CreateExtendedPlayer(player, accounts, inventory, job, loadout, name, c
 	self.addInventoryItem = function(name, count)
 		local item = self.getInventoryItem(name)
 
+		if item then
+			local newCount = item.count + count
+			item.count     = newCount
+
 			TriggerEvent('esx:onAddInventoryItem', self.source, item, count)
-			TriggerEvent('disc-inventoryhud:addItem', self.source, name, count)
+			self.triggerEvent('esx:addInventoryItem', item, count)
+		end
+	end
+
+	self.removeInventoryItem = function(name, count)
+		local item = self.getInventoryItem(name)
+
+		if item then
+			local newCount = item.count - count
+
+			if newCount >= 0 then
+				item.count = newCount
+
+				TriggerEvent('esx:onRemoveInventoryItem', self.source, item, count)
+				self.triggerEvent('esx:removeInventoryItem', item, count)
+			end
+		end
+	end
+
+	self.setInventoryItem = function(name, count)
+		local item = self.getInventoryItem(name)
+
+		if item and count >= 0 then
+			local oldCount = item.count
+			item.count = count
+
+			if oldCount > item.count  then
+				TriggerEvent('esx:onRemoveInventoryItem', self.source, item, oldCount - item.count)
+				self.triggerEvent('esx:removeInventoryItem', item, oldCount - item.count)
+			else
+				TriggerEvent('esx:onAddInventoryItem', self.source, item, item.count - oldCount)
+				self.triggerEvent('esx:addInventoryItem', item, item.count - oldCount)
+			end
+		end
 	end
 
 	self.getWeight = function()
@@ -343,7 +376,7 @@ function CreateExtendedPlayer(player, accounts, inventory, job, loadout, name, c
 
 	self.setMaxWeight = function(newWeight)
 		self.maxWeight = newWeight
-		TriggerClientEvent('esx:setMaxWeight', self.source, self.maxWeight)
+		self.triggerEvent('esx:setMaxWeight', self.maxWeight)
 	end
 
 	self.setJob = function(job, grade)
@@ -374,14 +407,26 @@ function CreateExtendedPlayer(player, accounts, inventory, job, loadout, name, c
 			end
 
 			TriggerEvent('esx:setJob', self.source, self.job, lastJob)
-			TriggerClientEvent('esx:setJob', self.source, self.job)
+			self.triggerEvent('esx:setJob', self.job)
 		else
 			print(('[es_extended] [^3WARNING^7] Ignoring invalid .setJob() usage for "%s"'):format(self.identifier))
 		end
 	end
 
 	self.addWeapon = function(weaponName, ammo)
-		TriggerEvent('disc-inventoryhud:addItem', self.source, weaponName, ammo)
+		local weaponLabel = ESX.GetWeaponLabel(weaponName)
+
+		if not self.hasWeapon(weaponName) then
+			table.insert(self.loadout, {
+				name = weaponName,
+				ammo = ammo,
+				label = weaponLabel,
+				components = {}
+			})
+
+			self.triggerEvent('esx:addWeapon', weaponName, ammo)
+			self.triggerEvent('esx:addInventoryItem', {label = weaponLabel}, 1)
+		end
 	end
 
 	self.addWeaponComponent = function(weaponName, weaponComponent)
@@ -390,7 +435,7 @@ function CreateExtendedPlayer(player, accounts, inventory, job, loadout, name, c
 		if weapon then
 			if not self.hasWeaponComponent(weaponName, weaponComponent) then
 				table.insert(self.loadout[loadoutNum].components, weaponComponent)
-				TriggerClientEvent('esx:addWeaponComponent', self.source, weaponName, weaponComponent)
+				self.triggerEvent('esx:addWeaponComponent', weaponName, weaponComponent)
 			end
 		end
 	end
@@ -400,7 +445,7 @@ function CreateExtendedPlayer(player, accounts, inventory, job, loadout, name, c
 
 		if weapon then
 			weapon.ammo = weapon.ammo + ammoCount
-			TriggerClientEvent('esx:setWeaponAmmo', self.source, weaponName, weapon.ammo)
+			self.triggerEvent('esx:setWeaponAmmo', weaponName, weapon.ammo)
 		end
 	end
 
@@ -412,7 +457,7 @@ function CreateExtendedPlayer(player, accounts, inventory, job, loadout, name, c
 				weaponLabel = v.label
 
 				for k2,v2 in ipairs(v.components) do
-					TriggerClientEvent('esx:removeWeaponComponent', self.source, weaponName, v2)
+					self.triggerEvent('esx:removeWeaponComponent', weaponName, v2)
 				end
 
 				table.remove(self.loadout, k)
@@ -421,8 +466,8 @@ function CreateExtendedPlayer(player, accounts, inventory, job, loadout, name, c
 		end
 
 		if weaponLabel then
-			TriggerClientEvent('esx:removeWeapon', self.source, weaponName, ammo)
-			TriggerClientEvent('esx:removeInventoryItem', self.source, {label = weaponLabel}, 1)
+			self.triggerEvent('esx:removeWeapon', weaponName, ammo)
+			self.triggerEvent('esx:removeInventoryItem', {label = weaponLabel}, 1)
 		end
 	end
 
@@ -437,7 +482,7 @@ function CreateExtendedPlayer(player, accounts, inventory, job, loadout, name, c
 				end
 			end
 
-			TriggerClientEvent('esx:removeWeaponComponent', self.source, weaponName, weaponComponent)
+			self.triggerEvent('esx:removeWeaponComponent', weaponName, weaponComponent)
 		end
 	end
 
@@ -446,7 +491,7 @@ function CreateExtendedPlayer(player, accounts, inventory, job, loadout, name, c
 
 		if weapon then
 			weapon.ammo = weapon.ammo - ammoCount
-			TriggerClientEvent('esx:setWeaponAmmo', self.source, weaponName, weapon.ammo)
+			self.triggerEvent('esx:setWeaponAmmo', weaponName, weapon.ammo)
 		end
 	end
 
@@ -486,12 +531,12 @@ function CreateExtendedPlayer(player, accounts, inventory, job, loadout, name, c
 		return
 	end
 
-	self.showNotification = function(msg)
-		TriggerClientEvent('esx:showNotification', self.source, msg)
+	self.showNotification = function(msg, flash, saveToBrief, hudColorIndex)
+		self.triggerEvent('esx:showNotification', msg, flash, saveToBrief, hudColorIndex)
 	end
 
-	self.showHelpNotification = function(msg)
-		TriggerClientEvent('esx:showHelpNotification', self.source, msg)
+	self.showHelpNotification = function(msg, thisFrame, beep, duration)
+		self.triggerEvent('esx:showHelpNotification', msg, thisFrame, beep, duration)
 	end
 
 	return self
