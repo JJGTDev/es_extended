@@ -302,45 +302,8 @@ function CreateExtendedPlayer(player, accounts, inventory, job, loadout, name, c
 	self.addInventoryItem = function(name, count)
 		local item = self.getInventoryItem(name)
 
-		if item then
-			local newCount = item.count + count
-			item.count     = newCount
-
 			TriggerEvent('esx:onAddInventoryItem', self.source, item, count)
-			self.triggerEvent('esx:addInventoryItem', item, count)
-		end
-	end
-
-	self.removeInventoryItem = function(name, count)
-		local item = self.getInventoryItem(name)
-
-		if item then
-			local newCount = item.count - count
-
-			if newCount >= 0 then
-				item.count = newCount
-
-				TriggerEvent('esx:onRemoveInventoryItem', self.source, item, count)
-				self.triggerEvent('esx:removeInventoryItem', item, count)
-			end
-		end
-	end
-
-	self.setInventoryItem = function(name, count)
-		local item = self.getInventoryItem(name)
-
-		if item and count >= 0 then
-			local oldCount = item.count
-			item.count = count
-
-			if oldCount > item.count  then
-				TriggerEvent('esx:onRemoveInventoryItem', self.source, item, oldCount - item.count)
-				self.triggerEvent('esx:removeInventoryItem', item, oldCount - item.count)
-			else
-				TriggerEvent('esx:onAddInventoryItem', self.source, item, item.count - oldCount)
-				self.triggerEvent('esx:addInventoryItem', item, item.count - oldCount)
-			end
-		end
+			TriggerEvent('disc-inventoryhud:addItem', self.source, name, count)
 	end
 
 	self.getWeight = function()
@@ -414,19 +377,7 @@ function CreateExtendedPlayer(player, accounts, inventory, job, loadout, name, c
 	end
 
 	self.addWeapon = function(weaponName, ammo)
-		local weaponLabel = ESX.GetWeaponLabel(weaponName)
-
-		if not self.hasWeapon(weaponName) then
-			table.insert(self.loadout, {
-				name = weaponName,
-				ammo = ammo,
-				label = weaponLabel,
-				components = {}
-			})
-
-			self.triggerEvent('esx:addWeapon', weaponName, ammo)
-			self.triggerEvent('esx:addInventoryItem', {label = weaponLabel}, 1)
-		end
+		TriggerEvent('disc-inventoryhud:addItem', self.source, weaponName, ammo)
 	end
 
 	self.addWeaponComponent = function(weaponName, weaponComponent)
