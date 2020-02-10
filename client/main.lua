@@ -124,15 +124,18 @@ AddEventHandler('es:activateMoney', function(money)
 end)
 
 RegisterNetEvent('esx:addInventoryItem')
-AddEventHandler('esx:addInventoryItem', function(item, count)
+AddEventHandler('esx:addInventoryItem', function(item, count, showNotification)
 	for k,v in ipairs(ESX.PlayerData.inventory) do
-		if v.name == item.name then
-			ESX.PlayerData.inventory[k] = item
+		if v.name == item then
+			ESX.UI.ShowInventoryItemNotification(true, v.label, count - v.count)
+			ESX.PlayerData.inventory[k].count = count
 			break
 		end
 	end
 
-	ESX.UI.ShowInventoryItemNotification(true, item, count)
+	if showNotification then
+		ESX.UI.ShowInventoryItemNotification(true, item, count)
+	end
 
 	if ESX.UI.Menu.IsOpen('default', 'es_extended', 'inventory') then
 		ESX.ShowInventory()
@@ -140,15 +143,18 @@ AddEventHandler('esx:addInventoryItem', function(item, count)
 end)
 
 RegisterNetEvent('esx:removeInventoryItem')
-AddEventHandler('esx:removeInventoryItem', function(item, count)
+AddEventHandler('esx:removeInventoryItem', function(item, count, showNotification)
 	for k,v in ipairs(ESX.PlayerData.inventory) do
-		if v.name == item.name then
-			ESX.PlayerData.inventory[k] = item
+		if v.name == item then
+			ESX.UI.ShowInventoryItemNotification(false, v.label, v.count - count)
+			ESX.PlayerData.inventory[k].count = count
 			break
 		end
 	end
 
-	ESX.UI.ShowInventoryItemNotification(false, item, count)
+	if showNotification then
+		ESX.UI.ShowInventoryItemNotification(false, item, count)
+	end
 
 	if ESX.UI.Menu.IsOpen('default', 'es_extended', 'inventory') then
 		ESX.ShowInventory()
@@ -400,7 +406,7 @@ Citizen.CreateThread(function()
 			local weaponHash = GetHashKey(weaponName)
 			local weaponComponents = {}
 
-			if HasPedGotWeapon(playerPed, weaponHash, false) and weaponName ~= 'WEAPON_UNARMED' then
+			if HasPedGotWeapon(playerPed, weaponHash, false) then
 				local ammo = GetAmmoInPedWeapon(playerPed, weaponHash)
 
 				for k2,v2 in ipairs(v.components) do
@@ -436,16 +442,13 @@ Citizen.CreateThread(function()
 	end
 end)
 
---[[ -- Menu interactions
-Citizen.CreateThread(function()
-	while true do
-		Citizen.Wait(0)
-
-		if IsControlJustReleased(0, 289) and IsInputDisabled(0) and not isDead and not ESX.UI.Menu.IsOpen('default', 'es_extended', 'inventory') then
-			ESX.ShowInventory()
-		end
+--[[ RegisterCommand('showinventory', function()
+	if not isDead and not ESX.UI.Menu.IsOpen('default', 'es_extended', 'inventory') then
+		ESX.ShowInventory()
 	end
-end) --]]
+end, false)
+
+RegisterKeyMapping('showinventory', _U('keymap_showinventory'), 'keyboard', 'F2') --]]
 
 -- Disable wanted level
 if Config.DisableWantedLevel then
