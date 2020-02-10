@@ -266,20 +266,6 @@ function CreateExtendedPlayer(player, accounts, inventory, job, loadout, name, c
 		end
 	end
 
-	self.setInventoryItem = function(name, count)
-		local item = self.getInventoryItem(name)
-
-		if item and count >= 0 then
-			count = ESX.Math.Round(count)
-
-			if count > item.count then
-				self.addInventoryItem(item.name, count - item.count)
-			else
-				self.removeInventoryItem(item.name, item.count - count)
-			end
-		end
-	end
-
 	self.getWeight = function()
 		local inventoryWeight = 0
 
