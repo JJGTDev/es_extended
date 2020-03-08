@@ -429,12 +429,12 @@ ESX.RegisterServerCallback('esx:getOtherPlayerData', function(source, cb, target
 	local xPlayer = ESX.GetPlayerFromId(target)
 
 	cb({
-		identifier   = xPlayer.identifier,
-		accounts     = xPlayer.getAccounts(),
-		inventory    = xPlayer.getInventory(),
-		job          = xPlayer.getJob(),
-		loadout      = xPlayer.getLoadout(),
-		money        = xPlayer.getMoney()
+		identifier = xPlayer.identifier,
+		accounts = xPlayer.getAccounts(),
+		inventory = xPlayer.getInventory(),
+		job = xPlayer.getJob(),
+		loadout = xPlayer.getLoadout(),
+		money = xPlayer.getMoney()
 	})
 end)
 
