@@ -1,30 +1,27 @@
-ESX                           = {}
-ESX.PlayerData                = {}
-ESX.PlayerLoaded              = false
-ESX.CurrentRequestId          = 0
-ESX.ServerCallbacks           = {}
-ESX.TimeoutCallbacks          = {}
+ESX = {}
+ESX.PlayerData = {}
+ESX.PlayerLoaded = false
+ESX.CurrentRequestId = 0
+ESX.ServerCallbacks = {}
+ESX.TimeoutCallbacks = {}
 
-ESX.UI                        = {}
-ESX.UI.HUD                    = {}
+ESX.UI = {}
+ESX.UI.HUD = {}
 ESX.UI.HUD.RegisteredElements = {}
-ESX.UI.Menu                   = {}
-ESX.UI.Menu.RegisteredTypes   = {}
-ESX.UI.Menu.Opened            = {}
+ESX.UI.Menu = {}
+ESX.UI.Menu.RegisteredTypes = {}
+ESX.UI.Menu.Opened = {}
 
-ESX.Game                      = {}
-ESX.Game.Utils                = {}
+ESX.Game = {}
+ESX.Game.Utils = {}
 
-ESX.Scaleform                 = {}
-ESX.Scaleform.Utils           = {}
+ESX.Scaleform = {}
+ESX.Scaleform.Utils = {}
 
-ESX.Streaming                 = {}
+ESX.Streaming = {}
 
 ESX.SetTimeout = function(msec, cb)
-	table.insert(ESX.TimeoutCallbacks, {
-		time = GetGameTimer() + msec,
-		cb   = cb
-	})
+	table.insert(ESX.TimeoutCallbacks, {time = GetGameTimer() + msec, cb = cb})
 	return #ESX.TimeoutCallbacks
 end
 
@@ -86,10 +83,7 @@ ESX.TriggerServerCallback = function(name, cb, ...)
 end
 
 ESX.UI.HUD.SetDisplay = function(opacity)
-	SendNUIMessage({
-		action  = 'setHUDDisplay',
-		opacity = opacity
-	})
+	SendNUIMessage({action = 'setHUDDisplay', opacity = opacity})
 end
 
 ESX.UI.HUD.RegisterElement = function(name, index, priority, html, data)
@@ -108,14 +102,7 @@ ESX.UI.HUD.RegisterElement = function(name, index, priority, html, data)
 
 	table.insert(ESX.UI.HUD.RegisteredElements, name)
 
-	SendNUIMessage({
-		action    = 'insertHUDElement',
-		name      = name,
-		index     = index,
-		priority  = priority,
-		html      = html,
-		data      = data
-	})
+	SendNUIMessage({action = 'insertHUDElement', name = name, index = index, priority = priority, html = html,data = data})
 
 	ESX.UI.HUD.UpdateElement(name, data)
 end
@@ -128,37 +115,27 @@ ESX.UI.HUD.RemoveElement = function(name)
 		end
 	end
 
-	SendNUIMessage({
-		action    = 'deleteHUDElement',
-		name      = name
-	})
+	SendNUIMessage({action = 'deleteHUDElement', name = name})
 end
 
 ESX.UI.HUD.UpdateElement = function(name, data)
-	SendNUIMessage({
-		action = 'updateHUDElement',
-		name   = name,
-		data   = data
-	})
+	SendNUIMessage({action = 'updateHUDElement', name = name, data = data})
 end
 
 ESX.UI.Menu.RegisterType = function(type, open, close)
-	ESX.UI.Menu.RegisteredTypes[type] = {
-		open   = open,
-		close  = close
-	}
+	ESX.UI.Menu.RegisteredTypes[type] = {open = open, close = close}
 end
 
 ESX.UI.Menu.Open = function(type, namespace, name, data, submit, cancel, change, close)
 	local menu = {}
 
-	menu.type      = type
+	menu.type = type
 	menu.namespace = namespace
-	menu.name      = name
-	menu.data      = data
-	menu.submit    = submit
-	menu.cancel    = cancel
-	menu.change    = change
+	menu.name = name
+	menu.data = data
+	menu.submit = submit
+	menu.cancel = cancel
+	menu.change = change
 
 	menu.close = function()
 
@@ -175,7 +152,6 @@ ESX.UI.Menu.Open = function(type, namespace, name, data, submit, cancel, change,
 		if close then
 			close()
 		end
-
 	end
 
 	menu.update = function(query, newData)
@@ -195,7 +171,6 @@ ESX.UI.Menu.Open = function(type, namespace, name, data, submit, cancel, change,
 				end
 			end
 		end
-
 	end
 
 	menu.refresh = function()
@@ -273,12 +248,7 @@ ESX.UI.Menu.IsOpen = function(type, namespace, name)
 end
 
 ESX.UI.ShowInventoryItemNotification = function(add, item, count)
-	SendNUIMessage({
-		action = 'inventoryNotification',
-		add    = add,
-		item   = item,
-		count  = count
-	})
+	SendNUIMessage({action = 'inventoryNotification', add = add, item = item, count = count})
 end
 
 ESX.Game.GetPedMugshot = function(ped, transparent)
@@ -367,7 +337,7 @@ ESX.Game.SpawnVehicle = function(modelName, coords, heading, cb)
 		ESX.Streaming.RequestModel(model)
 
 		local vehicle = CreateVehicle(model, coords.x, coords.y, coords.z, heading, true, false)
-		local id      = NetworkGetNetworkIdFromEntity(vehicle)
+		local id = NetworkGetNetworkIdFromEntity(vehicle)
 
 		SetNetworkIdCanMigrate(id, true)
 		SetEntityAsMissionEntity(vehicle, true, false)
@@ -632,17 +602,16 @@ ESX.Game.GetPeds = function(ignoreList)
 end
 
 ESX.Game.GetClosestPed = function(coords, ignoreList)
-	local ignoreList      = ignoreList or {}
-	local peds            = ESX.Game.GetPeds(ignoreList)
-	local closestDistance = -1
-	local closestPed      = -1
+	local ignoreList = ignoreList or {}
+	local peds = ESX.Game.GetPeds(ignoreList)
+	local closestDistance, closestPed = -1, -1
 
 	for i=1, #peds, 1 do
 		local pedCoords = GetEntityCoords(peds[i])
 		local distance  = GetDistanceBetweenCoords(pedCoords, coords.x, coords.y, coords.z, true)
 
 		if closestDistance == -1 or closestDistance > distance then
-			closestPed      = peds[i]
+			closestPed = peds[i]
 			closestDistance = distance
 		end
 	end
@@ -664,86 +633,86 @@ ESX.Game.GetVehicleProperties = function(vehicle)
 		end
 
 		return {
-			model             = GetEntityModel(vehicle),
+			model = GetEntityModel(vehicle),
 
-			plate             = ESX.Math.Trim(GetVehicleNumberPlateText(vehicle)),
-			plateIndex        = GetVehicleNumberPlateTextIndex(vehicle),
+			plate = ESX.Math.Trim(GetVehicleNumberPlateText(vehicle)),
+			plateIndex = GetVehicleNumberPlateTextIndex(vehicle),
 
-			bodyHealth        = ESX.Math.Round(GetVehicleBodyHealth(vehicle), 1),
-			engineHealth      = ESX.Math.Round(GetVehicleEngineHealth(vehicle), 1),
+			bodyHealth = ESX.Math.Round(GetVehicleBodyHealth(vehicle), 1),
+			engineHealth = ESX.Math.Round(GetVehicleEngineHealth(vehicle), 1),
 
-			fuelLevel         = ESX.Math.Round(GetVehicleFuelLevel(vehicle), 1),
-			dirtLevel         = ESX.Math.Round(GetVehicleDirtLevel(vehicle), 1),
-			color1            = colorPrimary,
-			color2            = colorSecondary,
+			fuelLevel = ESX.Math.Round(GetVehicleFuelLevel(vehicle), 1),
+			dirtLevel = ESX.Math.Round(GetVehicleDirtLevel(vehicle), 1),
+			color1 = colorPrimary,
+			color2 = colorSecondary,
 
-			pearlescentColor  = pearlescentColor,
-			wheelColor        = wheelColor,
+			pearlescentColor = pearlescentColor,
+			wheelColor = wheelColor,
 
-			wheels            = GetVehicleWheelType(vehicle),
-			windowTint        = GetVehicleWindowTint(vehicle),
-			xenonColor        = GetVehicleXenonLightsColour(vehicle),
+			wheels = GetVehicleWheelType(vehicle),
+			windowTint = GetVehicleWindowTint(vehicle),
+			xenonColor = GetVehicleXenonLightsColour(vehicle),
 
-			neonEnabled       = {
+			neonEnabled = {
 				IsVehicleNeonLightEnabled(vehicle, 0),
 				IsVehicleNeonLightEnabled(vehicle, 1),
 				IsVehicleNeonLightEnabled(vehicle, 2),
 				IsVehicleNeonLightEnabled(vehicle, 3)
 			},
 
-			neonColor         = table.pack(GetVehicleNeonLightsColour(vehicle)),
-			extras            = extras,
-			tyreSmokeColor    = table.pack(GetVehicleTyreSmokeColor(vehicle)),
+			neonColor = table.pack(GetVehicleNeonLightsColour(vehicle)),
+			extras = extras,
+			tyreSmokeColor = table.pack(GetVehicleTyreSmokeColor(vehicle)),
 
-			modSpoilers       = GetVehicleMod(vehicle, 0),
-			modFrontBumper    = GetVehicleMod(vehicle, 1),
-			modRearBumper     = GetVehicleMod(vehicle, 2),
-			modSideSkirt      = GetVehicleMod(vehicle, 3),
-			modExhaust        = GetVehicleMod(vehicle, 4),
-			modFrame          = GetVehicleMod(vehicle, 5),
-			modGrille         = GetVehicleMod(vehicle, 6),
-			modHood           = GetVehicleMod(vehicle, 7),
-			modFender         = GetVehicleMod(vehicle, 8),
-			modRightFender    = GetVehicleMod(vehicle, 9),
-			modRoof           = GetVehicleMod(vehicle, 10),
+			modSpoilers = GetVehicleMod(vehicle, 0),
+			modFrontBumper = GetVehicleMod(vehicle, 1),
+			modRearBumper = GetVehicleMod(vehicle, 2),
+			modSideSkirt = GetVehicleMod(vehicle, 3),
+			modExhaust = GetVehicleMod(vehicle, 4),
+			modFrame = GetVehicleMod(vehicle, 5),
+			modGrille = GetVehicleMod(vehicle, 6),
+			modHood = GetVehicleMod(vehicle, 7),
+			modFender = GetVehicleMod(vehicle, 8),
+			modRightFender = GetVehicleMod(vehicle, 9),
+			modRoof = GetVehicleMod(vehicle, 10),
 
-			modEngine         = GetVehicleMod(vehicle, 11),
-			modBrakes         = GetVehicleMod(vehicle, 12),
-			modTransmission   = GetVehicleMod(vehicle, 13),
-			modHorns          = GetVehicleMod(vehicle, 14),
-			modSuspension     = GetVehicleMod(vehicle, 15),
-			modArmor          = GetVehicleMod(vehicle, 16),
+			modEngine = GetVehicleMod(vehicle, 11),
+			modBrakes = GetVehicleMod(vehicle, 12),
+			modTransmission = GetVehicleMod(vehicle, 13),
+			modHorns = GetVehicleMod(vehicle, 14),
+			modSuspension = GetVehicleMod(vehicle, 15),
+			modArmor = GetVehicleMod(vehicle, 16),
 
-			modTurbo          = IsToggleModOn(vehicle, 18),
-			modSmokeEnabled   = IsToggleModOn(vehicle, 20),
-			modXenon          = IsToggleModOn(vehicle, 22),
+			modTurbo = IsToggleModOn(vehicle, 18),
+			modSmokeEnabled = IsToggleModOn(vehicle, 20),
+			modXenon = IsToggleModOn(vehicle, 22),
 
-			modFrontWheels    = GetVehicleMod(vehicle, 23),
-			modBackWheels     = GetVehicleMod(vehicle, 24),
+			modFrontWheels = GetVehicleMod(vehicle, 23),
+			modBackWheels = GetVehicleMod(vehicle, 24),
 
-			modPlateHolder    = GetVehicleMod(vehicle, 25),
-			modVanityPlate    = GetVehicleMod(vehicle, 26),
-			modTrimA          = GetVehicleMod(vehicle, 27),
-			modOrnaments      = GetVehicleMod(vehicle, 28),
-			modDashboard      = GetVehicleMod(vehicle, 29),
-			modDial           = GetVehicleMod(vehicle, 30),
-			modDoorSpeaker    = GetVehicleMod(vehicle, 31),
-			modSeats          = GetVehicleMod(vehicle, 32),
+			modPlateHolder = GetVehicleMod(vehicle, 25),
+			modVanityPlate = GetVehicleMod(vehicle, 26),
+			modTrimA = GetVehicleMod(vehicle, 27),
+			modOrnaments = GetVehicleMod(vehicle, 28),
+			modDashboard = GetVehicleMod(vehicle, 29),
+			modDial = GetVehicleMod(vehicle, 30),
+			modDoorSpeaker = GetVehicleMod(vehicle, 31),
+			modSeats = GetVehicleMod(vehicle, 32),
 			modSteeringWheel  = GetVehicleMod(vehicle, 33),
 			modShifterLeavers = GetVehicleMod(vehicle, 34),
-			modAPlate         = GetVehicleMod(vehicle, 35),
-			modSpeakers       = GetVehicleMod(vehicle, 36),
-			modTrunk          = GetVehicleMod(vehicle, 37),
-			modHydrolic       = GetVehicleMod(vehicle, 38),
-			modEngineBlock    = GetVehicleMod(vehicle, 39),
-			modAirFilter      = GetVehicleMod(vehicle, 40),
-			modStruts         = GetVehicleMod(vehicle, 41),
-			modArchCover      = GetVehicleMod(vehicle, 42),
-			modAerials        = GetVehicleMod(vehicle, 43),
-			modTrimB          = GetVehicleMod(vehicle, 44),
-			modTank           = GetVehicleMod(vehicle, 45),
-			modWindows        = GetVehicleMod(vehicle, 46),
-			modLivery         = GetVehicleLivery(vehicle)
+			modAPlate = GetVehicleMod(vehicle, 35),
+			modSpeakers = GetVehicleMod(vehicle, 36),
+			modTrunk = GetVehicleMod(vehicle, 37),
+			modHydrolic = GetVehicleMod(vehicle, 38),
+			modEngineBlock = GetVehicleMod(vehicle, 39),
+			modAirFilter = GetVehicleMod(vehicle, 40),
+			modStruts = GetVehicleMod(vehicle, 41),
+			modArchCover = GetVehicleMod(vehicle, 42),
+			modAerials = GetVehicleMod(vehicle, 43),
+			modTrimB = GetVehicleMod(vehicle, 44),
+			modTank = GetVehicleMod(vehicle, 45),
+			modWindows = GetVehicleMod(vehicle, 46),
+			modLivery = GetVehicleLivery(vehicle)
 		}
 	else
 		return
@@ -935,8 +904,8 @@ ESX.ShowInventory = function()
 	ESX.UI.Menu.CloseAll()
 
 	ESX.UI.Menu.Open('default', GetCurrentResourceName(), 'inventory', {
-		title    = _U('inventory', currentWeight, ESX.PlayerData.maxWeight),
-		align    = 'bottom-right',
+		title = _U('inventory', currentWeight, ESX.PlayerData.maxWeight),
+		align = 'bottom-right',
 		elements = elements
 	}, function(data, menu)
 		menu.close()
