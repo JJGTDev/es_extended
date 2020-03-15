@@ -102,7 +102,14 @@ ESX.UI.HUD.RegisterElement = function(name, index, priority, html, data)
 
 	table.insert(ESX.UI.HUD.RegisteredElements, name)
 
-	SendNUIMessage({action = 'insertHUDElement', name = name, index = index, priority = priority, html = html,data = data})
+	SendNUIMessage({
+		action    = 'insertHUDElement',
+		name      = name,
+		index     = index,
+		priority  = priority,
+		html      = html,
+		data      = data
+	})
 
 	ESX.UI.HUD.UpdateElement(name, data)
 end
