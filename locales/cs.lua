@@ -93,6 +93,7 @@ Locales['cs'] = {
   ['commanderror_invaliditem'] = 'neplatny nazev predmetu',
   ['commanderror_invalidweapon'] = 'neplatna zbran',
   ['commanderror_console'] = 'tento prikaz neni spustitelny z konzole',
+  ['commanderror_invalidcommand'] = '^3%s^0 is not an valid command!',
   ['commanderror_invalidplayerid'] = 'neni zde zadny online hrac s timto id',
   ['commandgeneric_playerid'] = 'id hrace',
 
